@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomb of the Mask - Unlocked Masks</title>
+
+    <!-- PWA setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TotM Masks">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        body {
+            background-color: #000;
+            color: #e5e7eb;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+        }
+
+        .totm-yellow { color: #facc15; }
+        .totm-green { color: #4ade80; }
+        .totm-bg-yellow { background-color: #facc15; }
+        
+        th {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        
+        th:hover {
+            color: #4ade80;
+        }
+
+        .sort-icon {
+            display: inline-block;
+            width: 1em;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        th, td {
+            border-bottom: 1px solid #333;
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        /* Custom scrollbar for horizontal scrolling on mobile */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #111; 
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #facc15; 
+            border-radius: 4px;
+        }
+
+        .chat-container {
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 32px;
+            margin-bottom: 32px;
+        }
+
+        .chat-history {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding: 8px;
+            border: 1px solid #222;
+            background-color: #0a0a0a;
+            border-radius: 4px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: right;
+            margin-left: 20%;
+        }
+
+        .gemini-message {
+            background-color: #1a252f;
+            color: #4ade80; /* totm-green */
+            margin-right: 20%;
+            font-family: sans-serif; /* Fallback for readability in responses */
+            font-size: 1rem;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: white;
+            font-family: inherit;
+        }
+        
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: #facc15;
+        }
+
+        .chat-input-area button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            background-color: #facc15;
+            color: black;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .chat-input-area button:hover {
+            background-color: #eab308;
+        }
+        
+        .chat-input-area button:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                color: rgba(0,0,0,0);
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            40% {
+                color: #4ade80;
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            60% {
+                text-shadow:
+                    .25em 0 0 #4ade80,
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            80%, 100% {
+                text-shadow:
+                    .25em 0 0 #4ade80,
+                    .5em 0 0 #4ade80;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl text-center mb-2 totm-yellow uppercase tracking-widest">Unlocked Masks</h1>
+        <p class="text-center text-gray-400 mb-8">Calculated values include +0.1% per level beyond Level 1.</p>
+
+        <div class="table-container overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50 shadow-2xl">
+            <table id="masksTable" class="min-w-full whitespace-nowrap">
+                <thead>
+                    <tr class="text-yellow-400 uppercase tracking-wider bg-black">
+                        <th onclick="sortTable(0, 'string')">Mask Name <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(1, 'number')">Lvl <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(2, 'percent')">Coins <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(3, 'percent')">Score Boost <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(4, 'percent')">Bonus Lvl <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(5, 'percent')">Freezes <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(6, 'percent')">Magnets <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(7, 'percent')">Coin Addicts <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(8, 'string')">Special Effect <span class="sort-icon"></span></th>
+                        <th onclick="sortTable(9, 'string')" class="text-white bg-gray-800">Stage Mode Effect <span class="sort-icon"></span></th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-300">
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Travelboy</td><td>3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Cyclop</td><td>1</td><td class="totm-green">20%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-green-400">+20% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Chef</td><td>5</td><td class="totm-green">10.4%</td><td class="totm-green">20.4%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-green-400">+10.4% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Crow</td><td>5</td><td>-</td><td>-</td><td class="totm-green">20.4%</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Bear</td><td>2</td><td>-</td><td>-</td><td>-</td><td class="totm-green">20.1%</td><td>-</td><td>-</td><td class="text-yellow-200">No Snakes</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Dog</td><td>2</td><td class="totm-green">20.1%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Snakes</td>
+                        <td class="text-green-400">+20.1% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Pumpkin</td><td>2</td><td>-</td><td>-</td><td class="totm-green">20.1%</td><td class="totm-green">15.1%</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Kitty</td><td>3</td><td class="totm-green">20.2%</td><td>-</td><td>-</td><td>-</td><td class="totm-green">10.2%</td><td>-</td><td>-</td>
+                        <td class="text-green-400">+20.2% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Cowboy</td><td>7</td><td>-</td><td class="totm-green">20.6%</td><td>-</td><td>-</td><td class="totm-green">20.6%</td><td>-</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Pirate</td><td>3</td><td class="totm-green">20.2%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
+                        <td class="text-green-400">+20.2% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Viking</td><td>2</td><td class="totm-green">10.1%</td><td>-</td><td class="totm-green">30.1%</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-green-400">+10.1% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Rabbit</td><td>3</td><td class="totm-green">30.2%</td><td>-</td><td>-</td><td class="totm-green">10.2%</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-green-400">+30.2% Coins</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Frankie</td><td>2</td><td>-</td><td class="totm-green">10.1%</td><td>-</td><td>-</td><td class="totm-green">30.1%</td><td>-</td><td class="text-yellow-200">No Snakes</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Jester</td><td>2</td><td>-</td><td class="totm-green">15.1%</td><td class="totm-green">15.1%</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Vampire</td><td>5</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="totm-green">30.4%</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Nikandr</td><td>2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Mad Mask</td><td>6</td><td>-</td><td class="totm-green">35.5%</td><td>-</td><td>-</td><td>-</td><td class="totm-green">35.5%</td><td>-</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="font-bold text-white">Sleepy</td><td>3</td><td>-</td><td>-</td><td>-</td><td class="totm-green">15.2%</td><td>-</td><td class="totm-green">15.2%</td><td class="text-yellow-200">No Snakes</td>
+                        <td class="text-gray-500">None</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="chat-container">
+            <h2 class="text-2xl mb-4 totm-yellow text-center">Ask the Tomb Oracle (Powered by Gemini)</h2>
+            <p class="text-sm text-gray-400 mb-4 text-center">Ask for strategies on which mask to use based on your playstyle!</p>
+            
+            <div id="chatHistory" class="chat-history">
+                <div class="chat-message gemini-message">Greetings, adventurer. Ask me which mask will serve you best in the Tomb.</div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="e.g., Which mask is best for farming coins?" onkeypress="handleKeyPress(event)">
+                <button id="sendBtn" onclick="sendMessage()">Ask Oracle</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sortDirections = [];
+
+        function sortTable(columnIndex, dataType) {
+            const table = document.getElementById("masksTable");
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            const headers = table.querySelectorAll("th");
+            const icons = table.querySelectorAll(".sort-icon");
+
+            const isAscending = sortDirections[columnIndex] !== true;
+            sortDirections = []; 
+            sortDirections[columnIndex] = isAscending;
+
+            icons.forEach(icon => icon.innerHTML = "");
+            icons[columnIndex].innerHTML = isAscending ? "▲" : "▼";
+
+            rows.sort((a, b) => {
+                let cellA = a.cells[columnIndex].innerText.trim();
+                let cellB = b.cells[columnIndex].innerText.trim();
+
+                if (dataType === 'number') {
+                    let valA = cellA === '-' || cellA === 'None' ? 0 : parseFloat(cellA);
+                    let valB = cellB === '-' || cellB === 'None' ? 0 : parseFloat(cellB);
+                    return isAscending ? valA - valB : valB - valA;
+                } 
+                else if (dataType === 'percent') {
+                    let valA = cellA === '-' || cellA === 'None' ? -1 : parseFloat(cellA.replace(/[%+]/g, '').replace(' Coins', ''));
+                    let valB = cellB === '-' || cellB === 'None' ? -1 : parseFloat(cellB.replace(/[%+]/g, '').replace(' Coins', ''));
+                    return isAscending ? valA - valB : valB - valA;
+                }
+                else { 
+                    if (cellA === '-' || cellA === 'None') cellA = 'Z'; 
+                    if (cellB === '-' || cellB === 'None') cellB = 'Z';
+                    return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                }
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        const GEMINI_API_KEY = ""; // Kept empty as per instructions for Canvas environment
+        
+        const systemInstruction = `
+        You are an expert advisor for the mobile game 'Tomb of the Mask'. 
+        You help players choose the best masks based on their current inventory and playstyle goals.
+        Use the data from the 'Unlocked Masks' table provided below to inform your advice.
+        Keep your answers concise, helpful, and slightly mystical in tone, fitting the theme of an ancient tomb oracle.
+        Do not output markdown, just plain text.
+        
+        Mask Data:
+        - Travelboy (Lvl 3): No bonuses
+        - Cyclop (Lvl 1): +20% Coins (Stage Mode: +20% Coins)
+        - Chef (Lvl 5): +10.4% Coins, +20.4% Score
+        - Crow (Lvl 5): +20.4% Bonus Lvl
+        - Bear (Lvl 2): +20.1% Freezes, No Snakes
+        - Dog (Lvl 2): +20.1% Coins, No Snakes (Stage Mode: +20.1% Coins)
+        - Pumpkin (Lvl 2): +20.1% Bonus Lvl, +15.1% Freezes
+        - Kitty (Lvl 3): +20.2% Coins, +10.2% Magnets (Stage Mode: +20.2% Coins)
+        - Cowboy (Lvl 7): +20.6% Score, +20.6% Magnets
+        - Pirate (Lvl 3): +20.2% Coins, No Monkeys (Stage Mode: +20.2% Coins)
+        - Viking (Lvl 2): +10.1% Coins, +30.1% Bonus Lvl (Stage Mode: +10.1% Coins)
+        - Rabbit (Lvl 3): +30.2% Coins, +10.2% Freezes (Stage Mode: +30.2% Coins)
+        - Frankie (Lvl 2): +10.1% Score, +30.1% Magnets, No Snakes
+        - Jester (Lvl 2): +15.1% Score, +15.1% Bonus Lvl, No Monkeys
+        - Vampire (Lvl 5): +30.4% Magnets, No Monkeys
+        - Nikandr (Lvl 2): No bonuses
+        - Mad Mask (Lvl 6): +35.5% Score, +35.5% Coin Addicts
+        - Sleepy (Lvl 3): +15.2% Freezes, +15.2% Coin Addicts, No Snakes
+        `;
+
+        let chatContext = [
+             {
+                role: "user",
+                parts: [{ text: "Hello Oracle, I need guidance." }]
+             },
+             {
+                 role: "model",
+                 parts: [{text: "Greetings, adventurer. Ask me which mask will serve you best in the Tomb."}]
+             }
+        ];
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('chatInput');
+            const messageText = inputField.value.trim();
+            if (!messageText) return;
+
+            // Add user message to UI
+            appendMessage(messageText, 'user-message');
+            inputField.value = '';
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            inputField.disabled = true;
+
+            // Show loading state
+            const historyDiv = document.getElementById('chatHistory');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chat-message gemini-message';
+            loadingDiv.innerHTML = '<span class="loading-dots">Consulting the spirits</span>';
+            loadingDiv.id = 'loadingMessage';
+            historyDiv.appendChild(loadingDiv);
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+
+            // Add to context
+            chatContext.push({
+                role: "user",
+                parts: [{ text: messageText }]
+            });
+
+            try {
+                const responseText = await callGeminiAPI(chatContext);
+                
+                // Remove loading state
+                document.getElementById('loadingMessage').remove();
+                
+                // Add model response to UI
+                appendMessage(responseText, 'gemini-message');
+                
+                // Add model response to context
+                chatContext.push({
+                    role: "model",
+                    parts: [{ text: responseText }]
+                });
+
+            } catch (error) {
+                console.error("Failed to consult Oracle:", error);
+                document.getElementById('loadingMessage').remove();
+                appendMessage("The spirits are silent right now. Try again later.", 'gemini-message');
+                // Remove the last user message from context if the call failed
+                chatContext.pop();
+            } finally {
+                sendBtn.disabled = false;
+                inputField.disabled = false;
+                inputField.focus();
+            }
+        }
+
+        function appendMessage(text, className) {
+            const historyDiv = document.getElementById('chatHistory');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${className}`;
+            messageDiv.textContent = text;
+            historyDiv.appendChild(messageDiv);
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+        }
+
+        async function callGeminiAPI(history) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+            
+            const payload = {
+                contents: history,
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                },
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                 throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+            
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                return candidate.content.parts[0].text;
+            } else {
+                throw new Error("Unexpected response format from API");
+            }
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .catch((err) => console.error('Service worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
+
