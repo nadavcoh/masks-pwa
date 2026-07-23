@@ -490,8 +490,33 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .catch((err) => console.error('Service worker registration failed:', err));
+                navigator.serviceWorker.register('sw.js').then((registration) => {
+                    // Check for a new service worker whenever the page loads
+                    registration.update();
+
+                    // Poll periodically too, in case the app is left open for a while
+                    setInterval(() => registration.update(), 60 * 60 * 1000);
+
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // A new version has been installed and is waiting to activate.
+                                if (confirm('A new version of this app is available. Reload now?')) {
+                                    newWorker.postMessage('SKIP_WAITING');
+                                }
+                            }
+                        });
+                    });
+                }).catch((err) => console.error('Service worker registration failed:', err));
+
+                // Once the new worker takes control, reload to pick up the fresh assets.
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
+                });
             });
         }
     </script>

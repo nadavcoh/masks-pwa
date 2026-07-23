@@ -1,4 +1,4 @@
-const CACHE_NAME = 'totm-masks-v1';
+const CACHE_NAME = 'totm-masks-__COMMIT_HASH__';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -32,23 +32,41 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isAppShell = event.request.mode === 'navigate' ||
+    event.request.url.endsWith('manifest.json');
+
+  if (isAppShell) {
+    // Network-first: always try to get the latest page/manifest from the server.
+    // Only fall back to the cached copy if the network is unavailable.
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        return networkResponse;
+      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Everything else (icons, etc.): cache-first, since it rarely changes.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
 
       return fetch(event.request).then((networkResponse) => {
-        // Cache same-origin GET responses for future offline use
         if (event.request.method === 'GET' && networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         }
         return networkResponse;
-      }).catch(() => {
-        // Fallback to the shell page if offline and not cached
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
       });
     })
   );
+});
+
+// Let a page force this worker to activate immediately (see index.html update prompt).
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
