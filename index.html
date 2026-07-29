@@ -256,7 +256,7 @@
                         <td class="text-green-400">+30.3% Coins</td>
                     </tr>
                     <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Diver</td><td>4</td><td>-</td><td class="totm-green">25.3%</td><td>-</td><td class="totm-green">15.3%</td><td>-</td><td>-</td><td>-</td>
+                        <td class="font-bold text-white">Diver</td><td>4</td><td>-</td><td>-</td><td class="totm-green">25.3%</td><td>-</td><td>-</td><td class="totm-green">15.3%</td><td>-</td>
                         <td class="text-gray-500">None</td>
                     </tr>
                     <tr class="hover:bg-gray-800 transition-colors">
@@ -296,7 +296,10 @@
         </div>
 
         <div class="chat-container">
-            <h2 class="text-2xl mb-4 totm-yellow text-center">Ask the Tomb Oracle (Powered by Gemini)</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl totm-yellow">Ask the Tomb Oracle (Powered by Gemini)</h2>
+                <button onclick="configureApiKey()" class="text-xs text-gray-400 hover:text-yellow-400 underline cursor-pointer bg-transparent border-none">🔑 Key Settings</button>
+            </div>
             <p class="text-sm text-gray-400 mb-4 text-center">Ask for strategies on which mask to use based on your playstyle!</p>
             
             <div id="chatHistory" class="chat-history">
@@ -350,8 +353,6 @@
 
             rows.forEach(row => tbody.appendChild(row));
         }
-
-        const GEMINI_API_KEY = ""; // Kept empty as per instructions for Canvas environment
         
         const systemInstruction = `
         You are an expert advisor for the mobile game 'Tomb of the Mask'. 
@@ -373,7 +374,7 @@
         - Pirate (Lvl 4): +20.3% Coins, No Monkeys (Stage Mode: +20.3% Coins)
         - Viking (Lvl 2): +10.1% Coins, +30.1% Bonus Lvl (Stage Mode: +10.1% Coins)
         - Rabbit (Lvl 4): +30.3% Coins, +10.3% Freezes (Stage Mode: +30.3% Coins)
-        - Diver (Lvl 4): +25.3% Score, +15.3% Freezes
+        - Diver (Lvl 4): +25.3% Bonus Lvl, +15.3% Coin Addicts
         - Shapito (Lvl 4): +10.3% Bonus Lvl, +10.3% Freezes, +10.3% Magnets
         - Frankie (Lvl 7): +10.6% Score, +30.6% Magnets, No Snakes
         - Jester (Lvl 3): +15.2% Score, +15.2% Bonus Lvl, No Monkeys
@@ -398,6 +399,26 @@
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 sendMessage();
+            }
+        }
+
+        function getApiKey() {
+            let key = localStorage.getItem('totm_gemini_key');
+            if (!key) {
+                key = prompt("Please enter your Gemini API Key:");
+                if (key) {
+                    localStorage.setItem('totm_gemini_key', key.trim());
+                }
+            }
+            return key;
+        }
+
+        function configureApiKey() {
+            const currentKey = localStorage.getItem('totm_gemini_key') || '';
+            const newKey = prompt("Update your Gemini API Key:", currentKey);
+            if (newKey !== null) {
+                localStorage.setItem('totm_gemini_key', newKey.trim());
+                alert("API Key updated!");
             }
         }
 
@@ -447,7 +468,7 @@
             } catch (error) {
                 console.error("Failed to consult Oracle:", error);
                 document.getElementById('loadingMessage').remove();
-                appendMessage("The spirits are silent right now. Try again later.", 'gemini-message');
+                appendMessage(error.message || "The spirits are silent right now. Try again later.", 'gemini-message');
                 // Remove the last user message from context if the call failed
                 chatContext.pop();
             } finally {
@@ -467,7 +488,12 @@
         }
 
         async function callGeminiAPI(history) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                throw new Error("API key is required to consult the Oracle.");
+            }
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             
             const payload = {
                 contents: history,
@@ -483,7 +509,11 @@
             });
 
             if (!response.ok) {
-                 throw new Error(`API call failed with status: ${response.status}`);
+                if (response.status === 400 || response.status === 403) {
+                    localStorage.removeItem('totm_gemini_key');
+                    throw new Error("Invalid API key. Please check your key and try again.");
+                }
+                throw new Error(`API call failed with status: ${response.status}`);
             }
 
             const result = await response.json();
