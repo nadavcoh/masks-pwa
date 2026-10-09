@@ -275,35 +275,54 @@
 
         <div class="panel mt-8" id="upgradePanel">
             <h2 class="text-2xl totm-yellow uppercase tracking-wider mb-1">Who To Upgrade</h2>
-            <p class="text-sm text-gray-400 mb-4">Each upgrade adds +0.1% to every bonus on a mask and costs 50 coins &times; its current level. Masks that are low level with several bonuses give the most per coin.</p>
+            <p class="text-sm text-gray-400 mb-4">Only the mask you equip counts, so upgrade the masks you would actually pick for a situation. Each upgrade adds +0.1% to that mask's bonuses and costs 50 coins &times; its current level. Coins bonuses work everywhere; the other bonuses apply in Arcade only.</p>
             <div class="flex flex-wrap gap-4 items-end mb-4">
                 <label class="flex flex-col text-gray-300">Coins available
                     <input type="number" id="coinInput" min="0" step="50" class="w-40">
                 </label>
-                <label class="flex flex-col text-gray-300">Prioritize
-                    <select id="focusSelect"></select>
+                <label class="flex items-center gap-2 text-gray-300"><input type="checkbox" id="needSnakes"> Must have No Snakes</label>
+                <label class="flex items-center gap-2 text-gray-300"><input type="checkbox" id="needMonkeys"> Must have No Monkeys</label>
+            </div>
+
+            <h3 class="text-xl text-gray-300 mb-2">Best mask for each situation <span class="text-sm text-gray-500">(tap a row for the full ranking)</span></h3>
+            <div class="table-container overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50 mb-6">
+                <table class="min-w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-yellow-400 uppercase tracking-wider bg-black">
+                            <th style="cursor:default">Situation</th>
+                            <th style="cursor:default">Use</th>
+                            <th style="cursor:default">Upgrade With Coins</th>
+                            <th style="cursor:default">Next Cost</th>
+                            <th style="cursor:default">If You Spend It All Here</th>
+                        </tr>
+                    </thead>
+                    <tbody id="situationBody" class="text-gray-300"></tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-wrap gap-4 items-end mb-3">
+                <label class="flex flex-col text-gray-300">Full ranking for
+                    <select id="situationSelect"></select>
                 </label>
             </div>
-            <div id="planSummary" class="totm-green mb-3"></div>
             <div class="table-container overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
-                <table class="min-w-full whitespace-nowrap" id="rankTable">
+                <table class="min-w-full whitespace-nowrap">
                     <thead>
                         <tr class="text-yellow-400 uppercase tracking-wider bg-black">
                             <th style="cursor:default">#</th>
                             <th style="cursor:default">Mask</th>
                             <th style="cursor:default">Lvl</th>
-                            <th style="cursor:default">Next Cost</th>
-                            <th style="cursor:default">Each Upgrade Gives</th>
-                            <th style="cursor:default" title="Bonus points gained per 1,000 coins">Value / 1k</th>
-                            <th style="cursor:default">Plan With Your Coins</th>
+                            <th style="cursor:default" id="rankStatHead">Bonus</th>
+                            <th style="cursor:default">Its Other Bonuses</th>
+                            <th style="cursor:default">Upgrade</th>
+                            <th style="cursor:default">To Pass #1</th>
                         </tr>
                     </thead>
                     <tbody id="rankBody" class="text-gray-300"></tbody>
                 </table>
             </div>
             <div class="mt-2"><button id="rankToggle" class="link-btn"></button></div>
-            <div id="cardSection" class="mt-4"></div>
-            <div id="noBonusNote" class="text-sm text-gray-500 mt-3"></div>
+            <p class="text-sm text-gray-500 mt-3">Piggy, Piranha and Octopus upgrade with cards instead of coins. "To Pass #1" is how many levels, and how many coins, a mask needs to beat the current leader at this situation.</p>
         </div>
 
         <div class="chat-container">
@@ -329,7 +348,7 @@
         // l = current level, b = BASE (Lvl 1) bonuses in %, s = special effect,
         // cards = [owned, needed] for masks that upgrade with cards instead of coins.
         const MASKS = [
-            { n:'Travelboy', l:15, b:{}, s:'' },
+            { n:'Travelboy', l:15, b:{coins:0}, s:'' },
             { n:'Cyclop', l:15, b:{coins:20}, s:'' },
             { n:'Chef', l:14, b:{coins:10, score:20}, s:'' },
             { n:'Bull', l:11, b:{score:30, bonus:10}, s:'' },
@@ -355,7 +374,7 @@
             { n:'Screamy', l:13, b:{coins:10, freezes:30}, s:'' },
             { n:'Wizard', l:20, b:{score:15, freezes:15, addicts:15}, s:'' },
             { n:'Vampire', l:20, b:{magnets:30}, s:'No Monkeys' },
-            { n:'Nikandr', l:21, b:{}, s:'' },
+            { n:'Nikandr', l:21, b:{coins:0}, s:'' },
             { n:'Mad Mask', l:18, b:{score:35, addicts:35}, s:'' },
             { n:'Smile', l:12, b:{score:30, bonus:35}, s:'' },
             { n:'Sleepy', l:19, b:{freezes:15, addicts:15}, s:'No Snakes' },
@@ -398,7 +417,7 @@
         const STAT_LABEL = { coins: 'Coins', score: 'Score Boost', bonus: 'Bonus Lvl', freezes: 'Freezes', magnets: 'Magnets', addicts: 'Coin Addicts' };
         const PER_LEVEL = 0.1;          // +0.1% per level beyond Level 1
         const COST_PER_LEVEL = 50;      // coin upgrade cost = 50 x current level
-        const DEFAULT_COINS = 61818;
+        const DEFAULT_COINS = 62648;
 
         const r1 = x => Math.round(x * 10) / 10;
         const statVal = (m, k) => m.b[k] === undefined ? null : r1(m.b[k] + PER_LEVEL * (m.l - 1));
@@ -435,94 +454,101 @@
             }).join('');
         }
 
-        // ---------- Who to upgrade ----------
+        // ---------- Who to upgrade (situation based) ----------
+        const SITUATIONS = {
+            coins: 'Coins (Stage + Arcade)', score: 'Score Boost', bonus: 'Bonus Levels',
+            freezes: 'Freezes', magnets: 'Magnets', addicts: 'Coin Addicts'
+        };
         let showAllRanks = false;
 
-        function computeUpgrades(coins, focus) {
-            const weight = k => (focus && focus === k) ? 3 : 1;
-            const pool = MASKS.filter(m => !m.cards && hasBonus(m)).map(m => ({
-                m, start: m.l, lvl: m.l,
-                keys: Object.keys(m.b),
-                w: Object.keys(m.b).reduce((s, k) => s + weight(k), 0)
-            }));
-            const cost = c => COST_PER_LEVEL * c.lvl;
-            const value = c => (PER_LEVEL * c.w) / cost(c) * 1000;
+        const upgradeCost = m => COST_PER_LEVEL * m.l;
+        const costForLevels = (lvl, n) => COST_PER_LEVEL * (n * lvl + n * (n - 1) / 2);
+        function levelsAffordable(m, coins) {
+            let n = 0, left = coins;
+            while (left >= COST_PER_LEVEL * (m.l + n)) { left -= COST_PER_LEVEL * (m.l + n); n++; }
+            return n;
+        }
+        function filters() {
+            return { snakes: document.getElementById('needSnakes').checked, monkeys: document.getElementById('needMonkeys').checked };
+        }
+        function rankFor(stat) {
+            const f = filters();
+            return MASKS
+                .filter(m => m.b[stat] !== undefined && (!f.snakes || m.s === 'No Snakes') && (!f.monkeys || m.s === 'No Monkeys'))
+                .map(m => ({ m, v: statVal(m, stat) }))
+                .sort((a, b) => b.v - a.v || Object.keys(b.m.b).length - Object.keys(a.m.b).length || a.m.n.localeCompare(b.m.n));
+        }
+        const getCoins = () => Math.max(0, parseInt(document.getElementById('coinInput').value, 10) || 0);
+        const tag = m => m.s ? ` <span class="text-yellow-200 text-base">(${m.s})</span>` : '';
 
-            // Ranking of the *next* upgrade for each mask, at current levels
-            const ranking = pool.map(c => ({ c, cost: cost(c), value: value(c) }))
-                .sort((a, b) => b.value - a.value || a.cost - b.cost || a.c.m.n.localeCompare(b.c.m.n));
-
-            // Greedy plan: keep buying the best value-per-coin upgrade we can still afford
-            let remaining = coins, count = 0;
-            const spent = new Map();
-            while (true) {
-                let best = null;
-                for (const c of pool) {
-                    if (cost(c) <= remaining && (!best || value(c) > value(best))) best = c;
+        function renderSituations() {
+            const coins = getCoins();
+            document.getElementById('situationBody').innerHTML = Object.keys(SITUATIONS).map(stat => {
+                const list = rankFor(stat);
+                if (!list.length) return `<tr data-stat="${stat}" class="cursor-pointer hover:bg-gray-800"><td class="text-white">${SITUATIONS[stat]}</td><td colspan="4" class="text-gray-500">No unlocked mask matches</td></tr>`;
+                const lead = list[0];
+                const up = list.find(r => !r.m.cards);
+                let upCells = '<td colspan="3" class="text-gray-500">Only card-upgraded masks</td>';
+                if (up) {
+                    const n = levelsAffordable(up.m, coins);
+                    const after = r1(up.v + PER_LEVEL * n);
+                    const note = up === lead ? '' : ` <span class="text-gray-500 text-base">(${lead.m.n} uses cards)</span>`;
+                    upCells = `<td class="font-bold text-white">${up.m.n}${note} <span class="text-gray-400">${fmtPct(up.v)}</span></td><td>${fmtNum(upgradeCost(up.m))}</td><td>${n ? `+${n} lvls &rarr; ${fmtPct(after)}` : '<span class="text-gray-600">Not affordable</span>'}</td>`;
                 }
-                if (!best) break;
-                remaining -= cost(best);
-                spent.set(best, (spent.get(best) || 0) + cost(best));
-                best.lvl++; count++;
-            }
-            return { ranking, pool, spent, remaining, count };
+                const leadNote = lead.m.cards ? ` <span class="text-gray-500 text-base">(cards ${lead.m.cards[0]}/${lead.m.cards[1]})</span>` : '';
+                return `<tr data-stat="${stat}" class="cursor-pointer hover:bg-gray-800"><td class="text-white">${SITUATIONS[stat]}</td><td class="font-bold totm-green">${lead.m.n}${leadNote} <span class="text-gray-300">${fmtPct(lead.v)}</span></td>${upCells}</tr>`;
+            }).join('');
+        }
+
+        function renderRanking() {
+            const stat = document.getElementById('situationSelect').value;
+            const coins = getCoins();
+            const list = rankFor(stat);
+            document.getElementById('rankStatHead').textContent = STAT_LABEL[stat];
+            const lead = list[0];
+            const rows = showAllRanks ? list : list.slice(0, 10);
+            document.getElementById('rankBody').innerHTML = rows.map((r, i) => {
+                const m = r.m;
+                const others = STAT_KEYS.filter(k => k !== stat && m.b[k] !== undefined).map(k => `<span class="chip">${fmtPct(statVal(m, k))} ${STAT_LABEL[k]}</span>`).join('') + (m.s ? `<span class="chip text-yellow-200">${m.s}</span>` : '');
+                const upgrade = m.cards ? `<span class="text-gray-400">Cards ${m.cards[0]}/${m.cards[1]}</span>` : `${fmtNum(upgradeCost(m))} coins`;
+                let pass = '<span class="totm-green">Best</span>';
+                if (r !== lead) {
+                    const n = Math.round((lead.v - r.v) * 10) + 1;
+                    if (n > 20) pass = `<span class="text-gray-600">Too far (${n} lvls)</span>`;
+                    else if (m.cards) pass = `${n} lvls <span class="text-gray-500">(cards)</span>`;
+                    else {
+                        const c = costForLevels(m.l, n);
+                        pass = `${n} lvls &middot; <span class="${c <= coins ? 'totm-green' : 'text-gray-500'}">${fmtNum(c)} coins</span>`;
+                    }
+                }
+                return `<tr class="${r === lead ? 'plan-row' : ''}"><td>${i + 1}</td><td class="font-bold text-white">${m.n}</td><td>${m.l}</td><td class="totm-green">${fmtPct(r.v)}</td><td>${others || '-'}</td><td>${upgrade}</td><td>${pass}</td></tr>`;
+            }).join('') || '<tr><td colspan="7" class="text-gray-500">No unlocked mask matches</td></tr>';
+            const toggle = document.getElementById('rankToggle');
+            toggle.textContent = showAllRanks ? 'Show top 10 only' : `Show all ${list.length} masks`;
+            toggle.style.display = list.length > 10 ? '' : 'none';
         }
 
         function renderUpgrades() {
-            const coins = Math.max(0, parseInt(document.getElementById('coinInput').value, 10) || 0);
-            const focus = document.getElementById('focusSelect').value;
-            try { localStorage.setItem('totm_coins', String(coins)); localStorage.setItem('totm_focus', focus); } catch (e) {}
-
-            const { ranking, pool, spent, remaining, count } = computeUpgrades(coins, focus);
-            const planned = pool.filter(c => spent.has(c));
-            const totalSpent = coins - remaining;
-            document.getElementById('planSummary').textContent = count
-                ? `With ${fmtNum(coins)} coins: ${count} upgrades across ${planned.length} masks, spending ${fmtNum(totalSpent)} (${fmtNum(remaining)} left over).`
-                : `${fmtNum(coins)} coins isn't enough for any upgrade.`;
-
-            const plannedRows = ranking.filter(r => spent.has(r.c));
-            const defaultRows = plannedRows.length ? plannedRows : ranking.slice(0, 15);
-            const rows = showAllRanks ? ranking : defaultRows;
-            document.getElementById('rankBody').innerHTML = rows.map(r => {
-                const i = ranking.indexOf(r);
-                const c = r.c;
-                const gains = c.keys.map(k => `<span class="chip ${k === focus ? 'chip-focus' : ''}">+${PER_LEVEL}% ${STAT_LABEL[k]}</span>`).join('');
-                const inPlan = spent.has(c);
-                const plan = inPlan ? `+${c.lvl - c.start} lvls &rarr; Lvl ${c.lvl} (${fmtNum(spent.get(c))} coins)` : '<span class="text-gray-600">-</span>';
-                return `<tr class="${inPlan ? 'plan-row' : ''}"><td>${i + 1}</td><td class="font-bold text-white">${c.m.n}</td><td>${c.start}</td><td>${fmtNum(r.cost)}</td><td>${gains}</td><td class="totm-green">${r.value.toFixed(2)}</td><td>${plan}</td></tr>`;
-            }).join('');
-            const toggle = document.getElementById('rankToggle');
-            toggle.textContent = showAllRanks ? 'Show only masks in the plan' : `Show all ${ranking.length} ranked masks`;
-            toggle.style.display = ranking.length > defaultRows.length ? '' : 'none';
-
-            // Card-upgraded masks
-            const cardMasks = MASKS.filter(m => m.cards);
-            document.getElementById('cardSection').innerHTML = cardMasks.length ? `
-                <h3 class="text-xl text-gray-300 mb-2">Upgrades that use cards (not coins)</h3>
-                <div class="grid gap-3 sm:grid-cols-3">${cardMasks.map(m => {
-                    const [have, need] = m.cards;
-                    const gains = Object.keys(m.b).map(k => `<span class="chip">+${PER_LEVEL}% ${STAT_LABEL[k]}</span>`).join('');
-                    return `<div class="locked-card"><div class="font-bold text-white">${m.n} <span class="text-gray-400">Lvl ${m.l}</span></div><div class="text-gray-400 text-base mb-1">${have} / ${need} cards (${need - have} to go)</div>${gains}</div>`;
-                }).join('')}</div>` : '';
-
-            const none = MASKS.filter(m => !hasBonus(m)).map(m => m.n);
-            document.getElementById('noBonusNote').textContent = none.length ? `No bonuses to improve: ${none.join(', ')}.` : '';
+            try { localStorage.setItem('totm_coins', String(getCoins())); } catch (e) {}
+            renderSituations();
+            renderRanking();
         }
 
         function initUpgradePanel() {
-            let coins = DEFAULT_COINS, focus = '';
-            try {
-                const sc = localStorage.getItem('totm_coins'); if (sc !== null) coins = parseInt(sc, 10) || 0;
-                focus = localStorage.getItem('totm_focus') || '';
-            } catch (e) {}
-            const sel = document.getElementById('focusSelect');
-            sel.innerHTML = '<option value="">Balanced (all bonuses equal)</option>' +
-                STAT_KEYS.map(k => `<option value="${k}">${STAT_LABEL[k]} (counts 3x)</option>`).join('');
-            sel.value = STAT_KEYS.includes(focus) ? focus : '';
+            let coins = DEFAULT_COINS;
+            try { const sc = localStorage.getItem('totm_coins'); if (sc !== null) coins = parseInt(sc, 10) || 0; } catch (e) {}
+            const sel = document.getElementById('situationSelect');
+            sel.innerHTML = Object.keys(SITUATIONS).map(k => `<option value="${k}">${SITUATIONS[k]}</option>`).join('');
             document.getElementById('coinInput').value = coins;
             document.getElementById('coinInput').addEventListener('input', renderUpgrades);
-            sel.addEventListener('change', renderUpgrades);
-            document.getElementById('rankToggle').addEventListener('click', () => { showAllRanks = !showAllRanks; renderUpgrades(); });
+            document.getElementById('needSnakes').addEventListener('change', renderUpgrades);
+            document.getElementById('needMonkeys').addEventListener('change', renderUpgrades);
+            sel.addEventListener('change', renderRanking);
+            document.getElementById('rankToggle').addEventListener('click', () => { showAllRanks = !showAllRanks; renderRanking(); });
+            document.getElementById('situationBody').addEventListener('click', e => {
+                const tr = e.target.closest('tr[data-stat]');
+                if (tr) { sel.value = tr.dataset.stat; renderRanking(); }
+            });
             renderUpgrades();
         }
 
