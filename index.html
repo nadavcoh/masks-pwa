@@ -182,6 +182,58 @@
                     .5em 0 0 #4ade80;
             }
         }
+
+        /* Collection progress + upgrade advisor */
+        .panel {
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .progress-track {
+            border: 2px solid #facc15;
+            background: #000;
+            height: 28px;
+            padding: 2px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4ade80;
+            transition: width 0.4s;
+        }
+        .chip {
+            display: inline-block;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 0 6px;
+            margin: 0 4px 4px 0;
+            font-size: 1rem;
+            line-height: 1.4;
+            background: #1a1a1a;
+        }
+        .chip-focus { border-color: #facc15; color: #facc15; }
+        .locked-card {
+            border: 1px dashed #555;
+            border-radius: 6px;
+            padding: 10px 12px;
+            background: #0a0a0a;
+        }
+        .panel input, .panel select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: white;
+            font-family: inherit;
+            font-size: 1.1rem;
+        }
+        .panel input:focus, .panel select:focus { outline: none; border-color: #facc15; }
+        .plan-row td { background: rgba(74, 222, 128, 0.07); }
+        .link-btn {
+            background: transparent; border: none; cursor: pointer;
+            color: #facc15; text-decoration: underline; font-family: inherit; font-size: 1.1rem;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -189,6 +241,17 @@
     <div class="max-w-6xl mx-auto">
         <h1 class="text-4xl text-center mb-2 totm-yellow uppercase tracking-widest">Unlocked Masks</h1>
         <p class="text-center text-gray-400 mb-8">Calculated values include +0.1% per level beyond Level 1.</p>
+
+        <div class="panel" id="progressPanel">
+            <div class="flex justify-between items-end mb-2">
+                <h2 class="text-2xl totm-yellow uppercase tracking-wider">Collection Progress</h2>
+                <span id="progressLabel" class="totm-green"></span>
+            </div>
+            <div class="progress-track"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
+            <h3 class="text-xl text-gray-300 mt-4 mb-2">Locked masks (<span id="lockedCount"></span>)</h3>
+            <div id="lockedList" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
+            <p class="text-sm text-gray-500 mt-3">Locked-mask prices and base bonuses come from the Tomb of the Mask Wiki.</p>
+        </div>
 
         <div class="table-container overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50 shadow-2xl">
             <table id="masksTable" class="min-w-full whitespace-nowrap">
@@ -206,193 +269,41 @@
                         <th onclick="sortTable(9, 'string')" class="text-white bg-gray-800">Stage Mode Effect <span class="sort-icon"></span></th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-300">
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Travelboy</td><td>9</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Cyclop</td><td>9</td><td class="totm-green">20.8%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+20.8% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Chef</td><td>8</td><td class="totm-green">10.7%</td><td class="totm-green">20.7%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+10.7% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Bull</td><td>9</td><td>-</td><td class="totm-green">30.8%</td><td class="totm-green">10.8%</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Monkey</td><td>9</td><td class="totm-green">30.8%</td><td>-</td><td class="totm-green">10.8%</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
-                        <td class="text-green-400">+30.8% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Bear</td><td>11</td><td>-</td><td>-</td><td>-</td><td class="totm-green">21.0%</td><td>-</td><td>-</td><td class="text-yellow-200">No Snakes</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Crow</td><td>10</td><td>-</td><td>-</td><td class="totm-green">20.9%</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Koala</td><td>11</td><td>-</td><td>-</td><td class="totm-green">36.0%</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Samurai</td><td>8</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="totm-green">30.7%</td><td class="totm-green">30.7%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Dog</td><td>11</td><td class="totm-green">21.0%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Snakes</td>
-                        <td class="text-green-400">+21.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Pumpkin</td><td>9</td><td>-</td><td>-</td><td class="totm-green">20.8%</td><td class="totm-green">15.8%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Kitty</td><td>11</td><td class="totm-green">21.0%</td><td>-</td><td>-</td><td>-</td><td class="totm-green">11.0%</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+21.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Cowboy</td><td>15</td><td>-</td><td class="totm-green">21.4%</td><td>-</td><td>-</td><td class="totm-green">21.4%</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Viking</td><td>11</td><td class="totm-green">11.0%</td><td>-</td><td class="totm-green">31.0%</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+11.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Pirate</td><td>11</td><td class="totm-green">21.0%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
-                        <td class="text-green-400">+21.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Rabbit</td><td>11</td><td class="totm-green">31.0%</td><td>-</td><td>-</td><td class="totm-green">11.0%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+31.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Diver</td><td>9</td><td>-</td><td>-</td><td class="totm-green">25.8%</td><td>-</td><td>-</td><td class="totm-green">15.8%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Shapito</td><td>11</td><td>-</td><td>-</td><td class="totm-green">11.0%</td><td class="totm-green">11.0%</td><td class="totm-green">11.0%</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Frankie</td><td>11</td><td>-</td><td class="totm-green">11.0%</td><td>-</td><td>-</td><td class="totm-green">31.0%</td><td>-</td><td class="text-yellow-200">No Snakes</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Knight</td><td>11</td><td class="totm-green">21.0%</td><td class="totm-green">21.0%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+21.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Skull</td><td>11</td><td class="totm-green">36.0%</td><td>-</td><td>-</td><td class="totm-green">16.0%</td><td>-</td><td class="totm-green">16.0%</td><td>-</td>
-                        <td class="text-green-400">+36.0% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Jester</td><td>12</td><td>-</td><td class="totm-green">16.1%</td><td class="totm-green">16.1%</td><td>-</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Voodoo</td><td>12</td><td class="totm-green">41.1%</td><td>-</td><td>-</td><td class="totm-green">21.1%</td><td>-</td><td class="totm-green">21.1%</td><td>-</td>
-                        <td class="text-green-400">+41.1% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Screamy</td><td>9</td><td class="totm-green">10.8%</td><td>-</td><td>-</td><td class="totm-green">30.8%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+10.8% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Wizard</td><td>15</td><td>-</td><td class="totm-green">16.4%</td><td>-</td><td class="totm-green">16.4%</td><td>-</td><td class="totm-green">16.4%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Vampire</td><td>14</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="totm-green">31.3%</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Nikandr</td><td>15</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Mad Mask</td><td>12</td><td>-</td><td class="totm-green">36.1%</td><td>-</td><td>-</td><td>-</td><td class="totm-green">36.1%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Smile</td><td>10</td><td>-</td><td class="totm-green">30.9%</td><td class="totm-green">35.9%</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Sleepy</td><td>13</td><td>-</td><td>-</td><td>-</td><td class="totm-green">16.2%</td><td>-</td><td class="totm-green">16.2%</td><td class="text-yellow-200">No Snakes</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Piranha</td><td>9</td><td>-</td><td>-</td><td>-</td><td class="totm-green">50.8%</td><td class="totm-green">25.8%</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Spooky</td><td>10</td><td class="totm-green">25.9%</td><td>-</td><td>-</td><td class="totm-green">25.9%</td><td>-</td><td>-</td><td class="text-yellow-200">No Monkeys</td>
-                        <td class="text-green-400">+25.9% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Robin</td><td>12</td><td>-</td><td>-</td><td>-</td><td class="totm-green">36.1%</td><td>-</td><td class="totm-green">36.1%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">King</td><td>10</td><td class="totm-green">20.9%</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="totm-green">30.9%</td><td>-</td>
-                        <td class="text-green-400">+20.9% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Fire</td><td>12</td><td>-</td><td>-</td><td class="totm-green">36.1%</td><td class="totm-green">26.1%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Leopard</td><td>9</td><td class="totm-green">30.8%</td><td class="totm-green">40.8%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+30.8% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Octopus</td><td>10</td><td>-</td><td>-</td><td class="totm-green">50.9%</td><td>-</td><td>-</td><td class="totm-green">25.9%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Spaceman</td><td>11</td><td>-</td><td>-</td><td>-</td><td>-</td><td class="totm-green">31.0%</td><td class="totm-green">21.0%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Spectrum</td><td>11</td><td>-</td><td class="totm-green">31.0%</td><td>-</td><td>-</td><td class="totm-green">21.0%</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Agent</td><td>9</td><td class="totm-green">40.8%</td><td>-</td><td>-</td><td class="totm-green">20.8%</td><td class="totm-green">20.8%</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+40.8% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Plague</td><td>11</td><td>-</td><td>-</td><td class="totm-green">36.0%</td><td class="totm-green">26.0%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Demon</td><td>10</td><td>-</td><td class="totm-green">20.9%</td><td>-</td><td>-</td><td>-</td><td class="totm-green">30.9%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Hippo</td><td>13</td><td class="totm-green">26.2%</td><td class="totm-green">21.2%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-green-400">+26.2% Coins</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Froggy</td><td>12</td><td>-</td><td class="totm-green">41.1%</td><td>-</td><td>-</td><td class="totm-green">11.1%</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">Eagle</td><td>14</td><td>-</td><td>-</td><td class="totm-green">36.3%</td><td>-</td><td>-</td><td class="totm-green">36.3%</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                    <tr class="hover:bg-gray-800 transition-colors">
-                        <td class="font-bold text-white">A4</td><td>10</td><td>-</td><td>-</td><td class="totm-green">40.9%</td><td class="totm-green">30.9%</td><td>-</td><td>-</td><td>-</td>
-                        <td class="text-gray-500">None</td>
-                    </tr>
-                </tbody>
+                <tbody id="masksBody" class="text-gray-300"></tbody>
             </table>
+        </div>
+
+        <div class="panel mt-8" id="upgradePanel">
+            <h2 class="text-2xl totm-yellow uppercase tracking-wider mb-1">Who To Upgrade</h2>
+            <p class="text-sm text-gray-400 mb-4">Each upgrade adds +0.1% to every bonus on a mask and costs 50 coins &times; its current level. Masks that are low level with several bonuses give the most per coin.</p>
+            <div class="flex flex-wrap gap-4 items-end mb-4">
+                <label class="flex flex-col text-gray-300">Coins available
+                    <input type="number" id="coinInput" min="0" step="50" class="w-40">
+                </label>
+                <label class="flex flex-col text-gray-300">Prioritize
+                    <select id="focusSelect"></select>
+                </label>
+            </div>
+            <div id="planSummary" class="totm-green mb-3"></div>
+            <div class="table-container overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table class="min-w-full whitespace-nowrap" id="rankTable">
+                    <thead>
+                        <tr class="text-yellow-400 uppercase tracking-wider bg-black">
+                            <th style="cursor:default">#</th>
+                            <th style="cursor:default">Mask</th>
+                            <th style="cursor:default">Lvl</th>
+                            <th style="cursor:default">Next Cost</th>
+                            <th style="cursor:default">Each Upgrade Gives</th>
+                            <th style="cursor:default" title="Bonus points gained per 1,000 coins">Value / 1k</th>
+                            <th style="cursor:default">Plan With Your Coins</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankBody" class="text-gray-300"></tbody>
+                </table>
+            </div>
+            <div class="mt-2"><button id="rankToggle" class="link-btn"></button></div>
+            <div id="cardSection" class="mt-4"></div>
+            <div id="noBonusNote" class="text-sm text-gray-500 mt-3"></div>
         </div>
 
         <div class="chat-container">
@@ -414,6 +325,212 @@
     </div>
 
     <script>
+        // ===================== MASK DATA =====================
+        // l = current level, b = BASE (Lvl 1) bonuses in %, s = special effect,
+        // cards = [owned, needed] for masks that upgrade with cards instead of coins.
+        const MASKS = [
+            { n:'Travelboy', l:15, b:{}, s:'' },
+            { n:'Cyclop', l:15, b:{coins:20}, s:'' },
+            { n:'Chef', l:14, b:{coins:10, score:20}, s:'' },
+            { n:'Bull', l:11, b:{score:30, bonus:10}, s:'' },
+            { n:'Monkey', l:10, b:{coins:30, bonus:10}, s:'No Monkeys' },
+            { n:'Bear', l:13, b:{freezes:20}, s:'No Snakes' },
+            { n:'Crow', l:17, b:{bonus:20}, s:'' },
+            { n:'Koala', l:17, b:{bonus:35}, s:'' },
+            { n:'Samurai', l:11, b:{magnets:30, addicts:30}, s:'' },
+            { n:'Dog', l:13, b:{coins:20}, s:'No Snakes' },
+            { n:'Pumpkin', l:12, b:{bonus:20, freezes:15}, s:'' },
+            { n:'Kitty', l:17, b:{coins:20, magnets:10}, s:'' },
+            { n:'Cowboy', l:17, b:{score:20, magnets:20}, s:'' },
+            { n:'Viking', l:12, b:{coins:10, bonus:30}, s:'' },
+            { n:'Pirate', l:16, b:{coins:20}, s:'No Monkeys' },
+            { n:'Rabbit', l:14, b:{coins:30, freezes:10}, s:'' },
+            { n:'Diver', l:11, b:{bonus:25, addicts:15}, s:'' },
+            { n:'Shapito', l:12, b:{bonus:10, freezes:10, magnets:10}, s:'' },
+            { n:'Frankie', l:17, b:{score:10, magnets:30}, s:'No Snakes' },
+            { n:'Knight', l:14, b:{coins:20, score:20}, s:'' },
+            { n:'Skull', l:17, b:{coins:35, freezes:15, addicts:15}, s:'' },
+            { n:'Jester', l:16, b:{score:15, bonus:15}, s:'No Monkeys' },
+            { n:'Voodoo', l:17, b:{coins:40, freezes:20, addicts:20}, s:'' },
+            { n:'Screamy', l:13, b:{coins:10, freezes:30}, s:'' },
+            { n:'Wizard', l:20, b:{score:15, freezes:15, addicts:15}, s:'' },
+            { n:'Vampire', l:20, b:{magnets:30}, s:'No Monkeys' },
+            { n:'Nikandr', l:21, b:{}, s:'' },
+            { n:'Mad Mask', l:18, b:{score:35, addicts:35}, s:'' },
+            { n:'Smile', l:12, b:{score:30, bonus:35}, s:'' },
+            { n:'Sleepy', l:19, b:{freezes:15, addicts:15}, s:'No Snakes' },
+            { n:'Piranha', l:11, b:{freezes:50, magnets:25}, s:'', cards:[10,12] },
+            { n:'Spooky', l:12, b:{coins:25, freezes:25}, s:'No Monkeys' },
+            { n:'Robin', l:13, b:{freezes:35, addicts:35}, s:'' },
+            { n:'King', l:14, b:{coins:20, addicts:30}, s:'' },
+            { n:'Fire', l:15, b:{bonus:35, freezes:25}, s:'' },
+            { n:'Leopard', l:15, b:{coins:30, score:40}, s:'' },
+            { n:'Octopus', l:25, b:{bonus:50, addicts:25}, s:'', cards:[11,26] },
+            { n:'Spaceman', l:14, b:{magnets:30, addicts:20}, s:'' },
+            { n:'Spectrum', l:16, b:{score:30, magnets:20}, s:'' },
+            { n:'Agent', l:10, b:{coins:40, freezes:20, magnets:20}, s:'' },
+            { n:'Plague', l:13, b:{bonus:35, freezes:25}, s:'' },
+            { n:'Demon', l:13, b:{score:20, addicts:30}, s:'' },
+            { n:'Hippo', l:17, b:{coins:25, score:20}, s:'' },
+            { n:'Froggy', l:13, b:{score:40, magnets:10}, s:'' },
+            { n:'Eagle', l:26, b:{bonus:35, addicts:35}, s:'' },
+            { n:'A4', l:12, b:{bonus:40, freezes:30}, s:'' },
+            { n:'Alien', l:1, b:{magnets:30}, s:'No Snakes' },
+            { n:'Assassin', l:17, b:{freezes:15}, s:'No Monkeys' },
+            { n:'Piggy', l:34, b:{coins:50, addicts:10}, s:'', cards:[22,35] },
+            { n:'Slime', l:1, b:{magnets:15}, s:'No Snakes' },
+            { n:'Black', l:1, b:{score:35, bonus:35}, s:'' },
+        ];
+
+        // Masks not yet unlocked (how = unlock method, b = base bonuses per the wiki)
+        const LOCKED = [
+            { n:'Robot', how:'Wheel of Fortune', b:{coins:30, addicts:20}, s:'' },
+            { n:'Zombie', how:'EUR 4.99', b:{coins:10, freezes:35}, s:'No Snakes' },
+            { n:'Anonym', how:'Unknown', b:{coins:35, score:35}, s:'' },
+            { n:'Mouse', how:'Wheel of Fortune', b:{freezes:30, bonus:10}, s:'' },
+            { n:'Gas', how:'EUR 4.99', b:{freezes:25, bonus:20}, s:'' },
+            { n:'Nerd', how:'EUR 4.99', b:{bonus:30, score:30}, s:'' },
+            { n:'Cup', how:'EUR 5.49', b:{magnets:20, addicts:40}, s:'' },
+            { n:'Eye', how:'EUR 5.49', b:{coins:40, freezes:25}, s:'' },
+        ];
+
+        const STAT_KEYS = ['coins', 'score', 'bonus', 'freezes', 'magnets', 'addicts'];
+        const STAT_LABEL = { coins: 'Coins', score: 'Score Boost', bonus: 'Bonus Lvl', freezes: 'Freezes', magnets: 'Magnets', addicts: 'Coin Addicts' };
+        const PER_LEVEL = 0.1;          // +0.1% per level beyond Level 1
+        const COST_PER_LEVEL = 50;      // coin upgrade cost = 50 x current level
+        const DEFAULT_COINS = 61818;
+
+        const r1 = x => Math.round(x * 10) / 10;
+        const statVal = (m, k) => m.b[k] === undefined ? null : r1(m.b[k] + PER_LEVEL * (m.l - 1));
+        const fmtPct = v => v.toFixed(1) + '%';
+        const fmtNum = n => n.toLocaleString('en-US');
+        const hasBonus = m => Object.keys(m.b).length > 0;
+
+        function renderTable() {
+            const tbody = document.getElementById('masksBody');
+            tbody.innerHTML = MASKS.map(m => {
+                const cells = STAT_KEYS.map(k => {
+                    const v = statVal(m, k);
+                    return v === null ? '<td>-</td>' : `<td class="totm-green">${fmtPct(v)}</td>`;
+                }).join('');
+                const special = m.s ? `<td class="text-yellow-200">${m.s}</td>` : '<td>-</td>';
+                const coins = statVal(m, 'coins');
+                const stage = coins === null ? '<td class="text-gray-500">None</td>' : `<td class="text-green-400">+${fmtPct(coins)} Coins</td>`;
+                return `<tr class="hover:bg-gray-800 transition-colors"><td class="font-bold text-white">${m.n}</td><td>${m.l}</td>${cells}${special}${stage}</tr>`;
+            }).join('');
+        }
+
+        // ---------- Collection progress ----------
+        function renderProgress() {
+            const total = MASKS.length + LOCKED.length;
+            const got = MASKS.length;
+            const pct = Math.round(got / total * 100);
+            document.getElementById('progressLabel').textContent = `${got} / ${total} unlocked (${pct}%)`;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('lockedCount').textContent = LOCKED.length;
+            document.getElementById('lockedList').innerHTML = LOCKED.map(m => {
+                const bonuses = STAT_KEYS.filter(k => m.b[k] !== undefined).map(k => `<span class="chip">+${m.b[k]}% ${STAT_LABEL[k]}</span>`).join('');
+                const special = m.s ? `<span class="chip text-yellow-200">${m.s}</span>` : '';
+                return `<div class="locked-card"><div class="font-bold text-white">🔒 ${m.n}</div><div class="text-gray-400 text-base mb-1">Unlock: ${m.how}</div>${bonuses}${special}</div>`;
+            }).join('');
+        }
+
+        // ---------- Who to upgrade ----------
+        let showAllRanks = false;
+
+        function computeUpgrades(coins, focus) {
+            const weight = k => (focus && focus === k) ? 3 : 1;
+            const pool = MASKS.filter(m => !m.cards && hasBonus(m)).map(m => ({
+                m, start: m.l, lvl: m.l,
+                keys: Object.keys(m.b),
+                w: Object.keys(m.b).reduce((s, k) => s + weight(k), 0)
+            }));
+            const cost = c => COST_PER_LEVEL * c.lvl;
+            const value = c => (PER_LEVEL * c.w) / cost(c) * 1000;
+
+            // Ranking of the *next* upgrade for each mask, at current levels
+            const ranking = pool.map(c => ({ c, cost: cost(c), value: value(c) }))
+                .sort((a, b) => b.value - a.value || a.cost - b.cost || a.c.m.n.localeCompare(b.c.m.n));
+
+            // Greedy plan: keep buying the best value-per-coin upgrade we can still afford
+            let remaining = coins, count = 0;
+            const spent = new Map();
+            while (true) {
+                let best = null;
+                for (const c of pool) {
+                    if (cost(c) <= remaining && (!best || value(c) > value(best))) best = c;
+                }
+                if (!best) break;
+                remaining -= cost(best);
+                spent.set(best, (spent.get(best) || 0) + cost(best));
+                best.lvl++; count++;
+            }
+            return { ranking, pool, spent, remaining, count };
+        }
+
+        function renderUpgrades() {
+            const coins = Math.max(0, parseInt(document.getElementById('coinInput').value, 10) || 0);
+            const focus = document.getElementById('focusSelect').value;
+            try { localStorage.setItem('totm_coins', String(coins)); localStorage.setItem('totm_focus', focus); } catch (e) {}
+
+            const { ranking, pool, spent, remaining, count } = computeUpgrades(coins, focus);
+            const planned = pool.filter(c => spent.has(c));
+            const totalSpent = coins - remaining;
+            document.getElementById('planSummary').textContent = count
+                ? `With ${fmtNum(coins)} coins: ${count} upgrades across ${planned.length} masks, spending ${fmtNum(totalSpent)} (${fmtNum(remaining)} left over).`
+                : `${fmtNum(coins)} coins isn't enough for any upgrade.`;
+
+            const plannedRows = ranking.filter(r => spent.has(r.c));
+            const defaultRows = plannedRows.length ? plannedRows : ranking.slice(0, 15);
+            const rows = showAllRanks ? ranking : defaultRows;
+            document.getElementById('rankBody').innerHTML = rows.map(r => {
+                const i = ranking.indexOf(r);
+                const c = r.c;
+                const gains = c.keys.map(k => `<span class="chip ${k === focus ? 'chip-focus' : ''}">+${PER_LEVEL}% ${STAT_LABEL[k]}</span>`).join('');
+                const inPlan = spent.has(c);
+                const plan = inPlan ? `+${c.lvl - c.start} lvls &rarr; Lvl ${c.lvl} (${fmtNum(spent.get(c))} coins)` : '<span class="text-gray-600">-</span>';
+                return `<tr class="${inPlan ? 'plan-row' : ''}"><td>${i + 1}</td><td class="font-bold text-white">${c.m.n}</td><td>${c.start}</td><td>${fmtNum(r.cost)}</td><td>${gains}</td><td class="totm-green">${r.value.toFixed(2)}</td><td>${plan}</td></tr>`;
+            }).join('');
+            const toggle = document.getElementById('rankToggle');
+            toggle.textContent = showAllRanks ? 'Show only masks in the plan' : `Show all ${ranking.length} ranked masks`;
+            toggle.style.display = ranking.length > defaultRows.length ? '' : 'none';
+
+            // Card-upgraded masks
+            const cardMasks = MASKS.filter(m => m.cards);
+            document.getElementById('cardSection').innerHTML = cardMasks.length ? `
+                <h3 class="text-xl text-gray-300 mb-2">Upgrades that use cards (not coins)</h3>
+                <div class="grid gap-3 sm:grid-cols-3">${cardMasks.map(m => {
+                    const [have, need] = m.cards;
+                    const gains = Object.keys(m.b).map(k => `<span class="chip">+${PER_LEVEL}% ${STAT_LABEL[k]}</span>`).join('');
+                    return `<div class="locked-card"><div class="font-bold text-white">${m.n} <span class="text-gray-400">Lvl ${m.l}</span></div><div class="text-gray-400 text-base mb-1">${have} / ${need} cards (${need - have} to go)</div>${gains}</div>`;
+                }).join('')}</div>` : '';
+
+            const none = MASKS.filter(m => !hasBonus(m)).map(m => m.n);
+            document.getElementById('noBonusNote').textContent = none.length ? `No bonuses to improve: ${none.join(', ')}.` : '';
+        }
+
+        function initUpgradePanel() {
+            let coins = DEFAULT_COINS, focus = '';
+            try {
+                const sc = localStorage.getItem('totm_coins'); if (sc !== null) coins = parseInt(sc, 10) || 0;
+                focus = localStorage.getItem('totm_focus') || '';
+            } catch (e) {}
+            const sel = document.getElementById('focusSelect');
+            sel.innerHTML = '<option value="">Balanced (all bonuses equal)</option>' +
+                STAT_KEYS.map(k => `<option value="${k}">${STAT_LABEL[k]} (counts 3x)</option>`).join('');
+            sel.value = STAT_KEYS.includes(focus) ? focus : '';
+            document.getElementById('coinInput').value = coins;
+            document.getElementById('coinInput').addEventListener('input', renderUpgrades);
+            sel.addEventListener('change', renderUpgrades);
+            document.getElementById('rankToggle').addEventListener('click', () => { showAllRanks = !showAllRanks; renderUpgrades(); });
+            renderUpgrades();
+        }
+
+        renderTable();
+        renderProgress();
+        initUpgradePanel();
+
+        // ===================== TABLE SORTING =====================
         let sortDirections = [];
 
         function sortTable(columnIndex, dataType) {
@@ -454,6 +571,15 @@
             rows.forEach(row => tbody.appendChild(row));
         }
         
+        function describeMask(m) {
+            const parts = STAT_KEYS.filter(k => m.b[k] !== undefined).map(k => `+${fmtPct(statVal(m, k))} ${STAT_LABEL[k]}`);
+            if (m.s) parts.push(m.s);
+            const coins = statVal(m, 'coins');
+            const stage = coins !== null ? ` (Stage Mode: +${fmtPct(coins)} Coins)` : '';
+            const upg = m.cards ? `, upgrades with cards ${m.cards[0]}/${m.cards[1]}` : `, next upgrade ${COST_PER_LEVEL * m.l} coins`;
+            return `- ${m.n} (Lvl ${m.l}${upg}): ${parts.length ? parts.join(', ') : 'No bonuses'}${stage}`;
+        }
+
         const systemInstruction = `
         You are an expert advisor for the mobile game 'Tomb of the Mask'. 
         You help players choose the best masks based on their current inventory and playstyle goals.
@@ -462,52 +588,9 @@
         Do not output markdown, just plain text.
         
         Mask Data:
-        - Travelboy (Lvl 9): No bonuses
-        - Cyclop (Lvl 9): +20.8% Coins (Stage Mode: +20.8% Coins)
-        - Chef (Lvl 8): +10.7% Coins, +20.7% Score (Stage Mode: +10.7% Coins)
-        - Bull (Lvl 9): +10.8% Bonus Lvl, +30.8% Score
-        - Bear (Lvl 11): +21.0% Freezes, No Snakes
-        - Crow (Lvl 10): +20.9% Bonus Lvl
-        - Koala (Lvl 11): +36.0% Bonus Lvl
-        - Monkey (Lvl 9): +30.8% Coins, +10.8% Bonus Lvl, No Monkeys (Stage Mode: +30.8% Coins)
-        - Samurai (Lvl 8): +30.7% Magnets, +30.7% Coin Addicts
-        - Dog (Lvl 11): +21.0% Coins, No Snakes (Stage Mode: +21.0% Coins)
-        - Pumpkin (Lvl 9): +20.8% Bonus Lvl, +15.8% Freezes
-        - Kitty (Lvl 11): +21.0% Coins, +11.0% Magnets (Stage Mode: +21.0% Coins)
-        - Cowboy (Lvl 15): +21.4% Score, +21.4% Magnets
-        - Viking (Lvl 11): +11.0% Coins, +31.0% Bonus Lvl (Stage Mode: +11.0% Coins)
-        - Pirate (Lvl 11): +21.0% Coins, No Monkeys (Stage Mode: +21.0% Coins)
-        - Rabbit (Lvl 11): +31.0% Coins, +11.0% Freezes (Stage Mode: +31.0% Coins)
-        - Diver (Lvl 9): +25.8% Bonus Lvl, +15.8% Coin Addicts
-        - Shapito (Lvl 11): +11.0% Bonus Lvl, +11.0% Freezes, +11.0% Magnets
-        - Frankie (Lvl 11): +11.0% Score, +31.0% Magnets, No Snakes
-        - Knight (Lvl 11): +21.0% Coins, +21.0% Score (Stage Mode: +21.0% Coins)
-        - Skull (Lvl 11): +36.0% Coins, +16.0% Coin Addicts, +16.0% Freezes (Stage Mode: +36.0% Coins)
-        - Jester (Lvl 12): +16.1% Score, +16.1% Bonus Lvl, No Monkeys
-        - Screamy (Lvl 9): +10.8% Coins, +30.8% Freezes (Stage Mode: +10.8% Coins)
-        - Voodoo (Lvl 12): +41.1% Coins, +21.1% Coin Addicts, +21.1% Freezes (Stage Mode: +41.1% Coins)
-        - Wizard (Lvl 15): +16.4% Score, +16.4% Coin Addicts, +16.4% Freezes
-        - Vampire (Lvl 14): +31.3% Magnets, No Monkeys
-        - Nikandr (Lvl 15): No bonuses
-        - Mad Mask (Lvl 12): +36.1% Score, +36.1% Coin Addicts
-        - Smile (Lvl 10): +30.9% Score, +35.9% Bonus Lvl
-        - Sleepy (Lvl 13): +16.2% Freezes, +16.2% Coin Addicts, No Snakes
-        - Piranha (Lvl 9): +25.8% Magnets, +50.8% Freezes
-        - Spooky (Lvl 10): +25.9% Coins, +25.9% Freezes, No Monkeys (Stage Mode: +25.9% Coins)
-        - Robin (Lvl 12): +36.1% Freezes, +36.1% Coin Addicts
-        - King (Lvl 10): +20.9% Coins, +30.9% Coin Addicts (Stage Mode: +20.9% Coins)
-        - Fire (Lvl 12): +36.1% Bonus Lvl, +26.1% Freezes
-        - Leopard (Lvl 9): +30.8% Coins, +40.8% Score (Stage Mode: +30.8% Coins)
-        - Octopus (Lvl 10): +50.9% Bonus Lvl, +25.9% Coin Addicts
-        - Spaceman (Lvl 11): +31.0% Magnets, +21.0% Coin Addicts
-        - Spectrum (Lvl 11): +21.0% Magnets, +31.0% Score
-        - Agent (Lvl 9): +40.8% Coins, +20.8% Magnets, +20.8% Freezes (Stage Mode: +40.8% Coins)
-        - Plague (Lvl 11): +26.0% Freezes, +36.0% Bonus Lvl
-        - Demon (Lvl 10): +30.9% Coin Addicts, +20.9% Score
-        - Hippo (Lvl 13): +26.2% Coins, +21.2% Score (Stage Mode: +26.2% Coins)
-        - Froggy (Lvl 12): +11.1% Magnets, +41.1% Score
-        - Eagle (Lvl 14): +36.3% Coin Addicts, +36.3% Bonus Lvl
-        - A4 (Lvl 10): +30.9% Freezes, +40.9% Bonus Lvl
+        ${MASKS.map(describeMask).join('\n        ')}
+
+        Still locked: ${LOCKED.map(m => m.n).join(', ')}.
         `;
 
         let chatContext = [
