@@ -356,7 +356,7 @@
             { n:'Bear', l:13, b:{freezes:20}, s:'No Snakes' },
             { n:'Crow', l:17, b:{bonus:20}, s:'' },
             { n:'Koala', l:17, b:{bonus:35}, s:'' },
-            { n:'Samurai', l:18, b:{magnets:30, addicts:30}, s:'', cards:[4,19] },
+            { n:'Samurai', l:23, b:{magnets:30, addicts:30}, s:'', cards:[1,24] },
             { n:'Dog', l:13, b:{coins:20}, s:'No Snakes' },
             { n:'Pumpkin', l:12, b:{bonus:20, freezes:15}, s:'' },
             { n:'Kitty', l:17, b:{coins:20, magnets:10}, s:'' },
@@ -366,58 +366,58 @@
             { n:'Rabbit', l:14, b:{coins:30, freezes:10}, s:'' },
             { n:'Diver', l:11, b:{bonus:25, addicts:15}, s:'' },
             { n:'Shapito', l:12, b:{bonus:10, freezes:10, magnets:10}, s:'' },
-            { n:'Frankie', l:21, b:{score:10, magnets:30}, s:'No Snakes' },
+            { n:'Frankie', l:31, b:{score:10, magnets:30}, s:'No Snakes', cards:[1,32] },
             { n:'Knight', l:14, b:{coins:20, score:20}, s:'' },
             { n:'Skull', l:17, b:{coins:35, freezes:15, addicts:15}, s:'' },
             { n:'Jester', l:16, b:{score:15, bonus:15}, s:'No Monkeys' },
             { n:'Voodoo', l:17, b:{coins:40, freezes:20, addicts:20}, s:'' },
             { n:'Screamy', l:13, b:{coins:10, freezes:30}, s:'' },
             { n:'Wizard', l:20, b:{score:15, freezes:15, addicts:15}, s:'' },
-            { n:'Vampire', l:24, b:{magnets:30}, s:'No Monkeys', cards:[18,25] },
+            { n:'Vampire', l:27, b:{magnets:30}, s:'No Monkeys', cards:[3,28] },
             { n:'Nikandr', l:21, b:{coins:0}, s:'' },
-            { n:'Mad Mask', l:34, b:{score:35, addicts:35}, s:'', cards:[10,35] },
+            { n:'Mad Mask', l:38, b:{score:35, addicts:35}, s:'', cards:[18,39] },
             { n:'Smile', l:12, b:{score:30, bonus:35}, s:'' },
             { n:'Sleepy', l:19, b:{freezes:15, addicts:15}, s:'No Snakes' },
-            { n:'Piranha', l:11, b:{freezes:50, magnets:25}, s:'', cards:[10,12] },
+            { n:'Piranha', l:12, b:{freezes:50, magnets:25}, s:'', cards:[11,13] },
             { n:'Spooky', l:12, b:{coins:25, freezes:25}, s:'No Monkeys' },
-            { n:'Robin', l:25, b:{freezes:35, addicts:35}, s:'', cards:[13,26] },
-            { n:'King', l:14, b:{coins:20, addicts:30}, s:'' },
+            { n:'Robin', l:26, b:{freezes:35, addicts:35}, s:'', cards:[24,27] },
+            { n:'King', l:21, b:{coins:20, addicts:30}, s:'', cards:[15,22] },
             { n:'Fire', l:15, b:{bonus:35, freezes:25}, s:'' },
-            { n:'Leopard', l:27, b:{coins:30, score:40}, s:'', cards:[4,28] },
-            { n:'Octopus', l:25, b:{bonus:50, addicts:25}, s:'', cards:[11,26] },
-            { n:'Spaceman', l:14, b:{magnets:30, addicts:20}, s:'' },
+            { n:'Leopard', l:30, b:{coins:30, score:40}, s:'', cards:[14,31] },
+            { n:'Octopus', l:25, b:{bonus:50, addicts:25}, s:'', cards:[25,26] },
+            { n:'Spaceman', l:17, b:{magnets:30, addicts:20}, s:'' },
             { n:'Spectrum', l:16, b:{score:30, magnets:20}, s:'' },
             { n:'Agent', l:10, b:{coins:40, freezes:20, magnets:20}, s:'' },
             { n:'Plague', l:13, b:{bonus:35, freezes:25}, s:'' },
-            { n:'Demon', l:13, b:{score:20, addicts:30}, s:'' },
+            { n:'Demon', l:23, b:{score:20, addicts:30}, s:'', cards:[21,24] },
             { n:'Hippo', l:17, b:{coins:25, score:20}, s:'' },
-            { n:'Froggy', l:22, b:{score:40, magnets:10}, s:'', cards:[14,23] },
-            { n:'Eagle', l:27, b:{bonus:35, addicts:35}, s:'', cards:[15,28] },
+            { n:'Froggy', l:30, b:{score:40, magnets:10}, s:'', cards:[18,31] },
+            { n:'Eagle', l:32, b:{bonus:35, addicts:35}, s:'', cards:[28,33] },
             { n:'A4', l:12, b:{bonus:40, freezes:30}, s:'' },
-            { n:'Alien', l:1, b:{magnets:30}, s:'No Snakes' },
+            { n:'Alien', l:10, b:{magnets:30}, s:'No Snakes' },
             { n:'Assassin', l:17, b:{freezes:15}, s:'No Monkeys' },
-            { n:'Piggy', l:34, b:{coins:50, addicts:10}, s:'', cards:[22,35] },
+            { n:'Piggy', l:36, b:{coins:50, addicts:10}, s:'', cards:[8,37] },
             { n:'Slime', l:1, b:{magnets:15}, s:'No Snakes' },
             { n:'Black', l:1, b:{score:35, bonus:35}, s:'' },
+            { n:'Zombie', l:1, b:{coins:10, freezes:35}, s:'No Snakes' },
+            { n:'Gas', l:1, b:{bonus:20, freezes:25}, s:'' },
+            { n:'Nerd', l:1, b:{score:30, bonus:30}, s:'' },
+            { n:'Cup', l:1, b:{magnets:20, addicts:40}, s:'' },
+            { n:'Eye', l:1, b:{coins:40, freezes:25}, s:'' },
         ];
 
         // Masks not yet unlocked (how = unlock method, b = base bonuses per the wiki)
         const LOCKED = [
             { n:'Robot', how:'Wheel of Fortune', b:{coins:30, addicts:20}, s:'' },
-            { n:'Zombie', how:'EUR 4.99', b:{coins:10, freezes:35}, s:'No Snakes' },
             { n:'Anonym', how:'Unknown', b:{coins:35, score:35}, s:'' },
             { n:'Mouse', how:'Wheel of Fortune', b:{bonus:10, freezes:30}, s:'' },
-            { n:'Gas', how:'EUR 4.99', b:{bonus:20, freezes:25}, s:'' },
-            { n:'Nerd', how:'EUR 4.99', b:{score:30, bonus:30}, s:'' },
-            { n:'Cup', how:'EUR 5.49', b:{magnets:20, addicts:40}, s:'' },
-            { n:'Eye', how:'EUR 5.49', b:{coins:40, freezes:25}, s:'' },
         ];
 
         const STAT_KEYS = ['coins', 'score', 'bonus', 'freezes', 'magnets', 'addicts'];
         const STAT_LABEL = { coins: 'Coins', score: 'Score Boost', bonus: 'Bonus Lvl', freezes: 'Freezes', magnets: 'Magnets', addicts: 'Coin Addicts' };
         const PER_LEVEL = 0.1;          // +0.1% per level beyond Level 1
         const COST_PER_LEVEL = 50;      // coin upgrade cost = 50 x current level
-        const DEFAULT_COINS = 929;
+        const DEFAULT_COINS = 5327;
 
         const r1 = x => Math.round(x * 10) / 10;
         const statVal = (m, k) => m.b[k] === undefined ? null : r1(m.b[k] + PER_LEVEL * (m.l - 1));
